@@ -2,6 +2,7 @@ const express = require("express");
 const { adminAuth } = require("./middlewares/admin");
 const { connectDB } = require("./config/database");
 const { User } = require("./models/userSchema");
+const { validateSignUpData } = require("./utils/validation");
 const app = express();
 app.use(express.json());
 
@@ -20,19 +21,28 @@ connectDB()
   });
 
 app.post("/user", async (req, res) => {
-  try {
-    const userData = {
-      firstName: "Krishna",
-      lastName: "Tripathi",
-      email: "krishna@gmail.com",
-      password: "krishna123",
-    };
+  validateSignUpData(req, res);
+  const { firstName, lastName, gender, email, password } = req.body;
 
-    const user = await User(userData);
+  try {
+    const user = await User({
+      firstName,
+      lastName,
+      gender,
+      email,
+      password,
+    });
     await user.save();
 
     res.send("User Data Saved SuccessFully" + user);
   } catch (err) {
     console.log(err);
   }
+});
+
+app.get("/get", async (req, res) => {
+  const id = req.body.id;
+  const user = await User.findById(id);
+
+  res.send("Found User ==> " + user);
 });
