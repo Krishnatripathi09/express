@@ -3,7 +3,7 @@ const adminAuth = (req, res, next) => {
   if (role === "admin") {
     console.log("Admin Authorized");
   } else {
-    conseol.log("Not Authorized");
+    console.log("Not Authorized");
   }
 
   next();
