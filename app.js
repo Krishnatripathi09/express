@@ -5,8 +5,10 @@ const { User } = require("./models/userSchema");
 const { validateSignUpData } = require("./utils/validation");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 const PORT = 3000;
 
@@ -65,12 +67,17 @@ app.post("/signIn", async (req, res) => {
 });
 
 app.get("/get", async (req, res) => {
+  const cookies = req.cookies;
+  const { token } = cookies;
+
+  const decodedMsg = await jwt.verify(token, "MySecretKey");
+  const { id } = decodedMsg;
   const page = req.query.page;
   let limit = req.query.limit;
   limit = limit > 2 ? 2 : 1;
   const skip = (page - 1) * limit;
 
-  const user = await User.find({}).skip(skip).limit(limit);
+  const user = await User.findById({ _id: id }).skip(skip).limit(limit);
 
   res.send("Found User ==> " + user);
 });
