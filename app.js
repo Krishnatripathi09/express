@@ -65,8 +65,12 @@ app.post("/signIn", async (req, res) => {
 });
 
 app.get("/get", async (req, res) => {
-  const id = req.body.id;
-  const user = await User.findById(id);
+  const page = req.query.page;
+  let limit = req.query.limit;
+  limit = limit > 2 ? 2 : 1;
+  const skip = (page - 1) * limit;
+
+  const user = await User.find({}).skip(skip).limit(limit);
 
   res.send("Found User ==> " + user);
 });
