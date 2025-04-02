@@ -1,5 +1,5 @@
 const express = require("express");
-const { adminAuth } = require("./middlewares/admin");
+const { adminAuth, userAuth } = require("./middlewares/admin");
 const { connectDB } = require("./config/database");
 const { User } = require("./models/userSchema");
 const { validateSignUpData } = require("./utils/validation");
@@ -46,7 +46,7 @@ app.post("/user", async (req, res) => {
   }
 });
 
-app.post("/signIn", async (req, res) => {
+app.post("/signin", async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
@@ -55,18 +55,20 @@ app.post("/signIn", async (req, res) => {
     res.status(404).send("User Not Found Please Enter Valid Email 😕  ");
   }
 
-  const isValidPassword = await bcrypt.compare(password, user.password);
-  const id = user.id;
+  const isValidPassword = await user.verifyPWD(password);
   if (isValidPassword) {
-    const token = await jwt.sign({ id: id }, "MySecretKey");
-    res.cookie("token", token);
+    const token = await user.signJWT();
+    res.cookie("token", token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 3600000),
+    });
     res.status(200).send("Sign In SuccessFull");
   } else {
     res.status(400).send("Invalid Password");
   }
 });
 
-app.get("/get", async (req, res) => {
+app.get("/get", userAuth, async (req, res) => {
   const cookies = req.cookies;
   const { token } = cookies;
 
