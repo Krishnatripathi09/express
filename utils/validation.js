@@ -33,4 +33,5 @@ const validateEditProfileData = (req, res) => {
 module.exports = {
   validateSignUpData,
   validateEditProfileData,
+  validatePassword,
 };
