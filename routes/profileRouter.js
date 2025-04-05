@@ -3,7 +3,7 @@ const validator = require("validator");
 const { validateEditProfileData } = require("../utils/validation");
 const { userAuth } = require("../middlewares/admin");
 const profileRouter = express.Router();
-
+const User = require("../models/userSchema");
 profileRouter.get("/get", userAuth, async (req, res) => {
   const cookies = req.cookies;
   const { token } = cookies;
@@ -55,6 +55,14 @@ profileRouter.patch("/user/password", userAuth, async (req, res) => {
 
   loggedInUser.password = passwordHash;
   await loggedInUser.save();
+});
+
+profileRouter.post("/logout", (req, res) => {
+  res.clearCookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+
+  res.send("Logged-out SuccessFully");
 });
 
 module.exports = {
